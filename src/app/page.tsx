@@ -1,5 +1,6 @@
 'use client';
-import { useReducer, ChangeEvent, ChangeEventHandler } from 'react';
+import { useImmerReducer, ImmerReducer } from 'use-immer';
+import { ChangeEvent, ChangeEventHandler } from 'react';
 import styles from '@/app/page.module.css';
 
 interface ArticleItem {
@@ -16,29 +17,27 @@ interface Action {
   value: string | number;
 }
 
-const articleReducer: (state: ArticleData, action: Action) => ArticleData = (state, action) => {
-  const newState = { ...state };
+const dataReducer: ImmerReducer<ArticleData, Action> = (draft, action) => {
   switch (action.type) {
     case 'input':
-      newState.inputValue = action.value.toString();
-      return newState;
+      draft.inputValue = action.value.toString();
+      return draft;
     case 'addItem': {
-      newState.list = [...newState.list, { id: state.inputValue, value: state.inputValue }];
-      newState.inputValue = '';
-      return newState;
+      draft.list.push({ id: draft.inputValue, value: draft.inputValue });
+      draft.inputValue = '';
+      return draft;
     }
     case 'deleteItem': {
-      newState.list = [...newState.list];
-      newState.list.splice(Number(action.value), 1);
-      return newState;
+      draft.list.splice(Number(action.value), 1);
+      return draft;
     }
     default:
-      return state;
+      return draft;
   }
 };
 
 export default function Home() {
-  const [data, dispatch] = useReducer(articleReducer, {
+  const [data, dispatch] = useImmerReducer(dataReducer, {
     inputValue: '',
     list: []
   });
